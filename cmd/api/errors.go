@@ -5,6 +5,10 @@ import (
 	"net/http"
 )
 
+func (app *application) failedValidationResponse(writer http.ResponseWriter, req *http.Request, errors map[string]string) {
+	app.errorResponse(writer, req, http.StatusUnprocessableEntity, errors)
+}
+
 func (app *application) logError(_ *http.Request, err error) {
 	app.errorLog.Println(err)
 }
@@ -22,6 +26,10 @@ func (app *application) serverErrorResponse(writer http.ResponseWriter, req *htt
 	message := "Internal Server Error"
 	app.logError(req, err)
 	app.errorResponse(writer, req, http.StatusInternalServerError, message)
+}
+
+func (app *application) badRequestResponse(writer http.ResponseWriter, req *http.Request, err error) {
+	app.errorResponse(writer, req, http.StatusBadRequest, err.Error())
 }
 
 func (app *application) notFoundResponse(writer http.ResponseWriter, req *http.Request) {
