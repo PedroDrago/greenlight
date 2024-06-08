@@ -41,3 +41,8 @@ func (app *application) methodNotAllowedResponse(writer http.ResponseWriter, req
 	message := fmt.Sprintf("the %s method is not supported for this resource", req.Method)
 	app.errorResponse(writer, req, http.StatusMethodNotAllowed, message)
 }
+
+func (app *application) editConflictResponse(writer http.ResponseWriter, req *http.Request) {
+	message := "unable to update the record due to an edit conflict, please try again"
+	app.errorResponse(writer, req, http.StatusConflict, message)
+}
