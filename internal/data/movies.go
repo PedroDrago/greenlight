@@ -117,3 +117,29 @@ func (m MovieModel) Delete(id int64) error {
 	}
 	return nil
 }
+
+func (m MovieModel) List() ([]Movie, error) {
+	query := `
+    SELECT id, created_at, title, year, runtime, genres, version
+    FROM movies
+    `
+
+	var movies []Movie
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		movie := Movie{}
+		args := []any{&movie.ID, &movie.CreatedAt, &movie.Title, &movie.Year, &movie.Runtime, pq.Array(&movie.Genres), &movie.Version}
+		err := rows.Scan(args...)
+		if err != nil {
+			return nil, err
+		}
+		movies = append(movies, movie)
+	}
+
+	return movies, nil
+}

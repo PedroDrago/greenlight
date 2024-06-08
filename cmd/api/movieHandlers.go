@@ -155,3 +155,15 @@ func (app *application) deleteMovieHandler(writer http.ResponseWriter, req *http
 		app.serverErrorResponse(writer, req, err)
 	}
 }
+
+func (app *application) listMoviesHandler(writer http.ResponseWriter, req *http.Request) {
+	movies, err := app.models.Movies.List()
+	if err != nil {
+		app.serverErrorResponse(writer, req, err)
+		return
+	}
+	err = app.writeJSON(writer, http.StatusOK, envelope{"movies": movies}, nil)
+	if err != nil {
+		app.serverErrorResponse(writer, req, err)
+	}
+}
