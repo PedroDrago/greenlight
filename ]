@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/PedroDrago/greenlight/internal/validator"
@@ -120,21 +119,17 @@ func (m MovieModel) Delete(id int64) error {
 }
 
 func (m MovieModel) List(title string, genres []string, filters Filters) ([]Movie, error) {
-	query := fmt.Sprintf(`
+	query := `
     SELECT id, created_at, title, year, runtime, genres, version
     FROM movies
     WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
     AND (genres @> $2 OR $2 = '{}')
-    ORDER BY %s %s, id ASC
-    LIMIT $3
-    OFFSET $4
-
-    `, filters.sortColumn(), filters.sortDirection())
+    ORDER BY year DESC
+    `
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	args := []any{title, pq.Array(genres), filters.limit(), filters.offset()}
-	rows, err := m.DB.QueryContext(ctx, query, args...)
+	rows, err := m.DB.QueryContext(ctx, query, title, pq.Array(genres))
 	if err != nil {
 		return nil, err
 	}
@@ -142,15 +137,7 @@ func (m MovieModel) List(title string, genres []string, filters Filters) ([]Movi
 	var movies []Movie
 	for rows.Next() {
 		var movie Movie
-		args := []any{
-			&movie.ID,
-			&movie.CreatedAt,
-			&movie.Title,
-			&movie.Year,
-			&movie.Runtime,
-			pq.Array(&movie.Genres),
-			&movie.Version,
-		}
+		args := []any{&movie.ID, &movie.CreatedAt, &movie.Title, &movie.Year, &movie.Runtime, pq.Array(&movie.Genres), &movie.Version}
 		err := rows.Scan(args...)
 		if err != nil {
 			return nil, err
