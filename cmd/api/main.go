@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/PedroDrago/greenlight/internal/data"
 	_ "github.com/lib/pq"
 )
 
@@ -32,6 +33,7 @@ type application struct {
 	config   config
 	infoLog  *log.Logger
 	errorLog *log.Logger
+	models   data.Models
 }
 
 func openDB(cfg config) (*sql.DB, error) {
@@ -56,7 +58,7 @@ func openDB(cfg config) (*sql.DB, error) {
 }
 
 func parseFlags(cfg *config) {
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "DSN for connection with PostgreSQL")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB"), "DSN for connection with PostgreSQL")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL Max Open Connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL Max Idle Connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL Max Connection Idle Time")
@@ -66,7 +68,7 @@ func parseFlags(cfg *config) {
 }
 
 // NOTE:  last page: 135 - Chapter 7 - CRUD Operations
-// FIX:   last page: 135 - Chapter 7 - CRUD Operations
+//  FIX:  last page: 135 - Chapter 7 - CRUD Operations
 // TEST:  last page: 135 - Chapter 7 - CRUD Operations
 // WARN:  last page: 135 - Chapter 7 - CRUD Operations
 // TODO:  last page: 135 - Chapter 7 - CRUD Operations
@@ -85,6 +87,7 @@ func main() {
 		app.errorLog.Fatal(err)
 	}
 	defer db.Close()
+	app.models = data.NewModels(db)
 
 	app.infoLog.Println("Connection with DB established")
 	srv := &http.Server{
