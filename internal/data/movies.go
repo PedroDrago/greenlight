@@ -24,7 +24,7 @@ type Movie struct {
 	Version   int32     `json:"version"`
 }
 
-func ValidateMovie(v *validator.Validator, movie *Movie) {
+func (movie *Movie) Validate(v *validator.Validator) {
 	v.Check(movie.Title != "", "title", "must be provided")
 	v.Check(len(movie.Title) <= 500, "title", "must not be more than 500 bytes long")
 	v.Check(movie.Year != 0, "year", "must be provided")
@@ -118,28 +118,32 @@ func (m MovieModel) Delete(id int64) error {
 	return nil
 }
 
-func (m MovieModel) List() ([]Movie, error) {
+func (m MovieModel) List(title string, genres []string, filters Filters) ([]*Movie, error) {
 	query := `
     SELECT id, created_at, title, year, runtime, genres, version
     FROM movies
+    ORDER BY id
     `
 
-	var movies []Movie
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+	var movies []*Movie
 	for rows.Next() {
-		movie := Movie{}
+		var movie Movie
 		args := []any{&movie.ID, &movie.CreatedAt, &movie.Title, &movie.Year, &movie.Runtime, pq.Array(&movie.Genres), &movie.Version}
 		err := rows.Scan(args...)
 		if err != nil {
 			return nil, err
 		}
-		movies = append(movies, movie)
+		movies = append(movies, &movie)
 	}
-
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
 	return movies, nil
 }

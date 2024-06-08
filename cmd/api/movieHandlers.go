@@ -28,7 +28,7 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, req *http
 		Runtime: input.Runtime,
 		Genres:  input.Genres,
 	}
-	if data.ValidateMovie(v, movie); !v.Valid() {
+	if movie.Validate(v); !v.Valid() {
 		app.failedValidationResponse(writer, req, v.Errors)
 		return
 	}
@@ -111,7 +111,7 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, req *http
 
 	v := validator.New()
 
-	if data.ValidateMovie(v, movie); !v.Valid() {
+	if movie.Validate(v); !v.Valid() {
 		app.failedValidationResponse(writer, req, v.Errors)
 		return
 	}
@@ -156,8 +156,38 @@ func (app *application) deleteMovieHandler(writer http.ResponseWriter, req *http
 	}
 }
 
+type params struct {
+	title    string
+	genres   []string
+	page     int32
+	pageSize int32
+	sort     string
+}
+
 func (app *application) listMoviesHandler(writer http.ResponseWriter, req *http.Request) {
-	movies, err := app.models.Movies.List()
+	var input struct {
+		Title  string
+		Genres []string
+		data.Filters
+	}
+	v := validator.New()
+	qs := req.URL.Query()
+	input.Title = app.readString(qs, "title", "")
+	input.Genres = app.readCSV(qs, "genres", []string{})
+	input.Page = app.readInt(qs, "page", 1, v)
+	input.PageSize = app.readInt(qs, "page_size", 20, v)
+	input.Sort = app.readString(qs, "sort", "id")
+	if !v.Valid() {
+		app.failedValidationResponse(writer, req, v.Errors)
+		return
+	}
+	input.SortSafelist = []string{"id", "title", "year", "runtime", "-id", "-title", "-year", "-runtime"}
+
+	if input.Validate(v); !v.Valid() {
+		app.failedValidationResponse(writer, req, v.Errors)
+		return
+	}
+	movies, err := app.models.Movies.List(input.Title, input.Genres, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(writer, req, err)
 		return
