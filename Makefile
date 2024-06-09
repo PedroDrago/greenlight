@@ -1,6 +1,5 @@
 PORT=-port=4000
 ENV=-env=dev
-LIMITER=-limiter-enabled=false
 FLAGS=$(ENV) $(PORT) $(LIMITER)
 run:
 	go run ./cmd/api $(FLAGS)
