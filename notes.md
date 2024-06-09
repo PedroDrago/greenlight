@@ -18,6 +18,8 @@ global bucket vs ip
 - Update Race Condition (optmistic lock)
 
 ### Pagination | Filtering | Ordering
+- [ ] DB Indexing
+- [ ] PSQL lexemes
 
 ### Routing
 
@@ -41,3 +43,4 @@ global bucket vs ip
 - Timeouts
 
 ### Graceful shutdown
+
