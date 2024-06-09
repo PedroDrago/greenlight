@@ -10,7 +10,7 @@ global bucket vs ip
 
 ### Context Timeout
 
-### Validator
+### Validator pattern
 
 ### Response Error Helpers
 
