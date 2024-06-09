@@ -1,0 +1,31 @@
+# .air.toml
+
+# Root directory of your project
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# Command to build the project
+cmd = "go build -o ./tmp/api ./cmd/api"
+
+# Binary file that will be run
+bin = "tmp/api"
+
+# Working directory
+full_bin = "./tmp/api"
+
+# Log settings
+log = "tmp/air.log"
+
+[watch]
+# Directories to watch for changes
+include_dir = ["./cmd", "./internal"]
+
+# File extensions to watch
+include_ext = ["go"]
+
+# Exclude directories from watching
+exclude_dir = ["tmp", "vendor"]
+
+# Exclude specific files from watching
+exclude_file = ["*.md"]

@@ -75,12 +75,6 @@ func parseFlags(cfg *config) {
 	flag.Parse()
 }
 
-// NOTE:  last page: 135 - Chapter 7 - CRUD Operations
-//  FIX:  last page: 135 - Chapter 7 - CRUD Operations
-// TEST:  last page: 135 - Chapter 7 - CRUD Operations
-// WARN:  last page: 135 - Chapter 7 - CRUD Operations
-// TODO:  last page: 135 - Chapter 7 - CRUD Operations
-
 func newApplication() (*application, *sql.DB) {
 	var cfg config
 	parseFlags(&cfg)
