@@ -1,10 +1,9 @@
 PORT=-port=4000
 ENV=-env=dev
 FLAGS=$(ENV) $(PORT) $(LIMITER)
-all: air
+all: 
+	go run ./cmd/api/
 
-air:
-	air
 run:
 	go run ./cmd/api $(FLAGS)
 air:

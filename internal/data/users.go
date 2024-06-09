@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"time"
@@ -143,6 +144,42 @@ func (m *UserModel) GetByEmail(email string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	err := m.DB.QueryRowContext(ctx, query, email).Scan(
+		&usr.ID,
+		&usr.CreatedAt,
+		&usr.Name,
+		&usr.Email,
+		&usr.Password.hash,
+		&usr.Activated,
+		&usr.Version,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &usr, nil
+}
+
+func (m *UserModel) GetForToken(scope string, tokenPlainText string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlainText))
+	query := `
+    SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.version
+    FROM users
+    INNER JOIN tokens
+    ON users.id = tokens.user_id
+    WHERE tokens.hash = $1
+    AND tokens.scope = $2
+    AND tokens.expiry > $3`
+
+	args := []any{tokenHash[:], scope, time.Now()}
+	var usr User
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
 		&usr.ID,
 		&usr.CreatedAt,
 		&usr.Name,
