@@ -15,6 +15,7 @@ type Level int8
 
 const (
 	LevelInfo Level = iota
+	LevelWarn
 	LevelError
 	LevelFatal
 	LevelOff
@@ -24,6 +25,8 @@ func (l Level) String() string {
 	switch l {
 	case LevelInfo:
 		return "INFO"
+	case LevelWarn:
+		return "WARN"
 	case LevelError:
 		return "ERROR"
 	case LevelFatal:
@@ -52,6 +55,10 @@ func (l *Logger) Info(message string, properties map[string]string) {
 
 func (l *Logger) Error(err error, properties map[string]string) {
 	l.print(LevelError, err.Error(), properties)
+}
+
+func (l *Logger) Warn(message string, properties map[string]string) {
+	l.print(LevelWarn, message, properties)
 }
 
 func (l *Logger) Fatal(err error, properties map[string]string) {
