@@ -15,7 +15,7 @@ global bucket vs ip
 ### Response Error Helpers
 
 ### CRUD
-- Update Race Condition
+- Update Race Condition (optmistic lock)
 
 ### Pagination | Filtering | Ordering
 
