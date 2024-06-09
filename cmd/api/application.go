@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"os"
+	"sync"
 
 	"github.com/PedroDrago/greenlight/internal/data"
 	"github.com/PedroDrago/greenlight/internal/data/jsonlog"
@@ -38,6 +39,7 @@ type application struct {
 	models data.Models
 	logger *jsonlog.Logger
 	mailer mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func parseFlags(cfg *config) {
