@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"fmt"
 	"os"
 
 	"github.com/PedroDrago/greenlight/internal/data"
@@ -67,7 +66,6 @@ func newApplication() (*application, *sql.DB) {
 		logger: jsonlog.New(os.Stdout, jsonlog.LevelInfo),
 		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
-	app.logger.Debug(fmt.Sprintf("%+v", cfg.smtp), nil)
 	db, err := openDB(cfg)
 	if err != nil {
 		app.logger.Fatal(err, nil)

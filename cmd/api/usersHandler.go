@@ -46,12 +46,13 @@ func (app *application) createUserHandler(writer http.ResponseWriter, req *http.
 		}
 		return
 	}
-	err = app.mailer.Send(usr.Email, "user_welcome.tmpl.html", usr)
-	if err != nil {
-		app.serverErrorResponse(writer, req, err)
-		return
-	}
-	err = app.writeJSON(writer, http.StatusCreated, envelope{"user": usr}, nil)
+	app.background(func() {
+		err = app.mailer.Send(usr.Email, "user_welcome.tmpl.html", usr)
+		if err != nil {
+			app.logger.Error(err, nil)
+		}
+	})
+	err = app.writeJSON(writer, http.StatusAccepted, envelope{"user": usr}, nil)
 	if err != nil {
 		app.serverErrorResponse(writer, req, err)
 	}
