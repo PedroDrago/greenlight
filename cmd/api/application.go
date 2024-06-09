@@ -54,8 +54,8 @@ func parseFlags(cfg *config) {
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
-	flag.StringVar(&cfg.smtp.username, "smtp-username", "41a0f021ab369c", "SMTP username")
-	flag.StringVar(&cfg.smtp.password, "smtp-password", "c0b8a7689e9d3a", "SMTP password")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", os.Getenv("TRAPMAIL_USERNAME"), "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", os.Getenv("TRAPMAIL_PASSWORD"), "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.pedrodrago.net>", "SMTP sender")
 	flag.Parse()
 }
