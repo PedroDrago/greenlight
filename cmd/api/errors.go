@@ -9,8 +9,11 @@ func (app *application) failedValidationResponse(writer http.ResponseWriter, req
 	app.errorResponse(writer, req, http.StatusUnprocessableEntity, errors)
 }
 
-func (app *application) logError(_ *http.Request, err error) {
-	app.errorLog.Println(err)
+func (app *application) logError(req *http.Request, err error) {
+	app.logger.Error(err, map[string]string{
+		"request_method": req.Method,
+		"request_url":    req.URL.String(),
+	})
 }
 
 func (app *application) errorResponse(writer http.ResponseWriter, req *http.Request, status int, message any) {

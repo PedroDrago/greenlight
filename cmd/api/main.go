@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/PedroDrago/greenlight/internal/data"
+	"github.com/PedroDrago/greenlight/internal/data/jsonlog"
 	_ "github.com/lib/pq"
 )
 
@@ -30,10 +31,9 @@ type config struct {
 }
 
 type application struct {
-	config   config
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	models   data.Models
+	config config
+	models data.Models
+	logger *jsonlog.Logger
 }
 
 func openDB(cfg config) (*sql.DB, error) {
@@ -73,31 +73,39 @@ func parseFlags(cfg *config) {
 // WARN:  last page: 135 - Chapter 7 - CRUD Operations
 // TODO:  last page: 135 - Chapter 7 - CRUD Operations
 
-func main() {
+func newApplication() (*application, *sql.DB) {
 	var cfg config
-
 	parseFlags(&cfg)
 	app := application{
-		config:   cfg,
-		infoLog:  log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
-		errorLog: log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+		config: cfg,
+		logger: jsonlog.New(os.Stdout, jsonlog.LevelInfo),
 	}
 	db, err := openDB(cfg)
 	if err != nil {
-		app.errorLog.Fatal(err)
+		app.logger.Fatal(err, nil)
 	}
-	defer db.Close()
 	app.models = data.NewModels(db)
+	return &app, db
+}
 
-	app.infoLog.Println("Connection with DB established")
+func newServer(app *application) *http.Server {
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
+		Addr:         fmt.Sprintf(":%d", app.config.port),
 		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
+		ErrorLog:     log.New(app.logger, "", 0),
 	}
-	app.infoLog.Printf("Starting %s server on %s", cfg.env, srv.Addr)
-	err = srv.ListenAndServe()
-	app.errorLog.Fatal(err)
+	return srv
+}
+
+func main() {
+	app, db := newApplication()
+	defer db.Close()
+	srv := newServer(app)
+	app.logger.Info("Connection with DB established", nil)
+	app.logger.Info("Starting %s server on %s", map[string]string{"addr": srv.Addr, "env": app.config.env})
+	err := srv.ListenAndServe()
+	app.logger.Fatal(err, nil)
 }
