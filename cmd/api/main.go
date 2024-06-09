@@ -9,5 +9,7 @@ func main() {
 	defer db.Close()
 	app.logger.Info("Connection with DB established", nil)
 	err := app.serve()
-	app.logger.Fatal(err, nil)
+	if err != nil {
+		app.logger.Fatal(err, nil)
+	}
 }
