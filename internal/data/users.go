@@ -8,7 +8,6 @@ import (
 
 	"github.com/PedroDrago/greenlight/internal/validator"
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/text/cases"
 )
 
 var ErrDuplicateEmail = errors.New("duplicate email")
