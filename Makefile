@@ -9,3 +9,6 @@ run:
 	go run ./cmd/api $(FLAGS)
 air:
 	cd cmd/api && air
+
+migrate:
+	migrate -path=./migrations -database=$GREENLIGHT_DB up
